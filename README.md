@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.png" width="96" height="96" alt="VolumeControl">
+  <img src="assets/icon-v2.png" width="96" height="96" alt="VolumeControl">
 </p>
 
 <h1 align="center">VolumeControl</h1>
@@ -102,7 +102,7 @@ VolumeControl/
 │   └── VolumeHotkey.ahk   # 源码（AutoHotkey v2）
 ├── assets/
 │   ├── icon.ico           # 程序图标
-│   └── icon.png           # 图标（README 用）
+│   └── icon-v2.png        # 图标（README 用）
 ├── tools/                 # 构建工具（Ahk2Exe 自动下载到此）
 ├── dist/                  # 编译输出（不进 git）
 ├── build.ps1              # 一键构建脚本

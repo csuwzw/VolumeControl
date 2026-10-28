@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.png" width="96" height="96" alt="VolumeControl">
+  <img src="assets/icon-v2.png" width="96" height="96" alt="VolumeControl">
 </p>
 
 <h1 align="center">VolumeControl</h1>
@@ -102,7 +102,7 @@ VolumeControl/
 │   └── VolumeHotkey.ahk   # Source (AutoHotkey v2)
 ├── assets/
 │   ├── icon.ico           # Program icon
-│   └── icon.png           # Icon for the README
+│   └── icon-v2.png        # Icon for the README
 ├── tools/                 # Build tools (Ahk2Exe auto-downloaded here)
 ├── dist/                  # Build output (not in git)
 ├── build.ps1              # One-click build script

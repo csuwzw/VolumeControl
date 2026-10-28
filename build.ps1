@@ -140,7 +140,7 @@ Save-Icon $bitmaps (Join-Path $root "assets\icon.ico")
 $master.Dispose()
 foreach ($b in $bitmaps) { $b.Dispose() }
 $pngMaster = New-IconMaster
-$pngMaster.Save((Join-Path $root "assets\icon.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+$pngMaster.Save((Join-Path $root "assets\icon-v2.png"), [System.Drawing.Imaging.ImageFormat]::Png)
 $pngMaster.Dispose()
 
 # ============================================================
