@@ -8,5 +8,5 @@
 
 # 二进制文件不做转换
 *.ico binary
-*.png text diff=image
+*.png -text diff=image
 *.exe binary
