@@ -1,0 +1,17 @@
+# 编译输出目录（exe 通过 GitHub Release 分发，不进源码仓库）
+dist/
+
+# 构建时自动下载的 Ahk2Exe 编译器（不进源码仓库）
+tools/Ahk2Exe/
+
+# 临时文件与日志
+*.log
+*.tmp
+*.bak
+
+# 系统/编辑器生成文件
+Thumbs.db
+desktop.ini
+.DS_Store
+.vs/
+.vscode/
