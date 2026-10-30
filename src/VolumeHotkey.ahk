@@ -39,15 +39,26 @@ A_IconTip := "VolumeControl`nCtrl+Alt+方向键 控制音量"
 ^!Left::Send "{Volume_Mute}"
 
 ; Ctrl+Alt+→：打开系统自带的音量合成器（可分别调节各程序音量）
-^!Right::Run "sndvol.exe"
+^!Right::OpenMixer()
 
 ; -------------------- 托盘右键菜单 --------------------
+
+; 清空 AutoHotkey 自带的英文菜单项（Open / Help / Window Spy /
+; Edit This Script 等对最终用户没有意义），换成统一的中文菜单
+A_TrayMenu.Delete()
+
+; “打开音量合成器”菜单项
+A_TrayMenu.Add("打开音量合成器", OpenMixer)
 
 ; “开机自动启动”菜单项：点击后在启动文件夹创建/删除快捷方式
 A_TrayMenu.Add("开机自动启动", ToggleAutoStart)
 
-; “打开音量合成器”菜单项
-A_TrayMenu.Add("打开音量合成器", (*) => Run("sndvol.exe"))
+; “暂停快捷键”菜单项：临时关闭全局热键（例如热键与当前软件冲突时）
+A_TrayMenu.Add("暂停快捷键", ToggleSuspend)
+
+; 若已配置开机自启，菜单项前面打勾
+if (IsAutoStart())
+    A_TrayMenu.Check("开机自动启动")
 
 ; 分隔线
 A_TrayMenu.Add()
@@ -57,10 +68,6 @@ A_TrayMenu.Add("关于 VolumeControl", ShowAbout)
 
 ; “退出”菜单项
 A_TrayMenu.Add("退出", (*) => ExitApp())
-
-; 若已配置开机自启，菜单项前面打勾
-if (IsAutoStart())
-    A_TrayMenu.Check("开机自动启动")
 
 ; 双击托盘图标时执行“打开音量合成器”
 A_TrayMenu.Default := "打开音量合成器"
@@ -73,24 +80,46 @@ AutoStartShortcutPath() {
     return A_Startup "\VolumeControl.lnk"
 }
 
-; 判断是否已配置开机自启（快捷方式存在即视为已配置）
+; 判断是否已配置开机自启
+; 仅“快捷方式存在”还不够：如果用户之后移动或重命名了 exe，
+; 旧快捷方式会指向一个不存在的路径，此时应视为未启用（点击后会重建）
 IsAutoStart() {
-    return FileExist(AutoStartShortcutPath())
+    link := AutoStartShortcutPath()
+    if !FileExist(link)
+        return false
+
+    try
+        FileGetShortcut(link, &target)
+    catch
+        return false    ; 快捷方式损坏或无法读取
+
+    return target = A_ScriptFullPath
 }
 
-; “开机自动启动”菜单回调：在启用 / 禁用之间切换
-; 参数 menuItem 为被点击的菜单项对象，用于更新前面的勾选标记
-ToggleAutoStart(menuItem, info) {
-    if (IsAutoStart()) {
+; “开机自动启动”菜单回调
+; 注意：菜单回调会收到 3 个参数（菜单项名称、位置、所属 Menu 对象），
+; 第一个参数是字符串而不是菜单对象，所以勾选状态要通过 A_TrayMenu 设置
+ToggleAutoStart(ItemName, ItemPos, *) {
+    if IsAutoStart() {
         ; 已启用 -> 删除快捷方式，取消勾选并气泡提示
-        try FileDelete(AutoStartShortcutPath())
-        menuItem.Uncheck()
-        TrayTip("VolumeControl", "已取消开机自动启动", 1)
+        try
+            FileDelete AutoStartShortcutPath()
+        catch as e {
+            MsgBox "无法取消开机自动启动：`n" e.Message, "VolumeControl", "Iconx"
+            return
+        }
+        A_TrayMenu.Uncheck(ItemName)
+        TrayTip "已取消开机自动启动", "VolumeControl", 1
     } else {
         ; 未启用 -> 创建快捷方式，打勾并气泡提示
-        CreateStartupShortcut()
-        menuItem.Check()
-        TrayTip("VolumeControl", "已设置开机自动启动", 1)
+        try
+            CreateStartupShortcut()
+        catch as e {
+            MsgBox "无法设置开机自动启动：`n" e.Message, "VolumeControl", "Iconx"
+            return
+        }
+        A_TrayMenu.Check(ItemName)
+        TrayTip "已设置开机自动启动", "VolumeControl", 1
     }
 }
 
@@ -108,11 +137,36 @@ CreateStartupShortcut() {
     shortcut.Save()                            ; 写入 .lnk 文件
 }
 
+; “暂停快捷键”菜单回调：关闭 / 恢复全部全局热键（托盘菜单本身不受影响）
+ToggleSuspend(ItemName, ItemPos, *) {
+    Suspend -1                     ; -1 表示在启用 / 暂停之间切换
+    if A_IsSuspended {
+        A_TrayMenu.Check(ItemName)
+        TrayTip "快捷键已暂停，再次点击可恢复", "VolumeControl", 1
+    } else {
+        A_TrayMenu.Uncheck(ItemName)
+        TrayTip "快捷键已恢复", "VolumeControl", 1
+    }
+}
+
+; 打开系统音量合成器
+; 绝大多数系统自带 sndvol.exe；个别精简系统没有时退回系统设置中的音量合成器页面
+OpenMixer(*) {
+    try
+        Run "sndvol.exe"
+    catch {
+        try
+            Run "ms-settings:appsvolume"
+        catch as e
+            MsgBox "无法打开音量合成器：`n" e.Message, "VolumeControl", "Iconx"
+    }
+}
+
 ; “关于”菜单回调：弹出说明窗口
-ShowAbout(menuItem, info) {
+ShowAbout(ItemName, ItemPos, *) {
     MsgBox(
     (
-    "VolumeControl v1.0.0`n`n"
+    "VolumeControl v1.0.1`n`n"
     "Ctrl+Alt+↑  音量增大`n"
     "Ctrl+Alt+↓  音量减小`n"
     "Ctrl+Alt+←  静音切换`n"

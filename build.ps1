@@ -65,7 +65,7 @@ function New-IconMaster {
         (New-Object System.Drawing.PointF(92, 106)),
         (New-Object System.Drawing.PointF(158, 58)),
         (New-Object System.Drawing.PointF(158, 198)),
-        New-Object System.Drawing.PointF(92, 150)
+        (New-Object System.Drawing.PointF(92, 150))
     ))
     $g.FillPath($white, $cone)
 

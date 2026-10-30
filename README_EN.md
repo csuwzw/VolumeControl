@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/platform-Windows%207%20%7C%208%20%7C%2010%20%7C%2011-blue" alt="platform">
+  <img src="https://img.shields.io/badge/platform-Windows%207%20%7C%208%20%7C%208.1%20%7C%2010%20%7C%2011-blue" alt="platform">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="license">
 </p>
 
@@ -24,7 +24,7 @@
 
 Many desktop keyboards have no volume keys, so adjusting the volume means reaching for the speaker icon in the system tray.
 
-**VolumeControl** gives you a set of global hotkeys using `Ctrl + Alt + Arrow keys`: whether you are in a game, watching a video, or writing a document, press the hotkeys to change the volume, and the native system volume overlay appears — exactly like pressing physical volume keys.
+**VolumeControl** gives you a set of global hotkeys using `Ctrl + Alt + Arrow keys`: in most apps (games, media players, documents) you can change the volume right away, and the native system volume overlay appears — exactly like pressing physical volume keys.
 
 ## Hotkeys
 
@@ -52,14 +52,30 @@ Either way:
 - **Recommended**: right-click the tray icon → click **"开机自动启动" (Run at Startup)**; a checkmark appears next to the menu item. The program creates a shortcut to itself in the Windows startup folder. Click again to remove it.
 - Or press `Win + R`, type `shell:startup`, and place a shortcut to `VolumeControl.exe` in the folder that opens.
 
+> The shortcut stores the absolute path of the exe. If you later move or rename the exe, click "Run at Startup" once to recreate it — the menu detects stale shortcuts and won't show them as enabled.
+
+## Tray menu
+
+Right-click the speaker icon in the system tray:
+
+| Menu item | Description |
+| :--- | :--- |
+| 打开音量合成器 (Open volume mixer) | Same as `Ctrl + Alt + →` |
+| 开机自动启动 (Run at Startup) | Creates / removes the startup-folder shortcut; checked while enabled |
+| 暂停快捷键 (Suspend hotkeys) | Temporarily disables all global hotkeys (e.g. when they conflict with another app); click again to resume |
+| 关于 VolumeControl (About) | Version and hotkey reference |
+| 退出 (Exit) | Quit the program |
+
+Double-clicking the tray icon also opens the volume mixer.
+
 ## How it works
 
-The program does one thing: when you press a hotkey, it sends the **standard Windows multimedia volume-key messages** (`VK_VOLUME_UP` / `VK_VOLUME_DOWN` / `VK_VOLUME_MUTE`). Windows itself then performs the volume change and shows the overlay.
+The program does one thing: when you press a hotkey, it sends **standard Windows multimedia volume-key keystrokes** (`VK_VOLUME_UP` / `VK_VOLUME_DOWN` / `VK_VOLUME_MUTE`). Windows itself then performs the volume change and shows the overlay.
 
 As a result it:
 
 - does not depend on any particular sound card or driver;
-- does not read or write audio parameters directly, so it won't conflict with games or players;
+- does not read or write audio parameters directly — the volume change is handled entirely by Windows, just like physical volume keys;
 - ships as an exe with the runtime built in — **end users never need to install AutoHotkey or anything else**.
 
 ## Requirements
@@ -71,10 +87,14 @@ As a result it:
 
 **Q: Nothing happens when I press `Ctrl + Alt + Arrow keys`?**
 
-On some computers this combination is taken by the **graphics card's screen-rotation hotkeys** (common on Intel integrated graphics). Fix it by:
+The combination may already be taken by other software:
 
-- Intel graphics: open "Intel Graphics Control Center / Graphics Properties → Options and Support (or Hotkeys)" and disable or change the screen-rotation hotkeys;
-- or disable the `Ctrl + Alt + Arrow keys` hotkey in the graphics control panel, then run this program again.
+- **Graphics card screen-rotation hotkeys** (common on Intel integrated graphics): open "Intel Graphics Control Center / Graphics Properties → Options and Support (or Hotkeys)" and disable or change the screen-rotation hotkeys; or disable `Ctrl + Alt + Arrow keys` in the graphics control panel, then run this program again.
+- **Editors / IDEs**: VS Code, IntelliJ IDEA and others use `Ctrl + Alt + ↑/↓` to add a cursor above/below. This program registers global hotkeys and takes priority; to use the other app's shortcut temporarily, right-click the tray icon → "暂停快捷键" (Suspend hotkeys), then click it again to resume.
+
+**Q: SmartScreen blocks the first run ("Windows protected your PC")?**
+
+The exe is not code-signed. After confirming it came from this repository's Releases page, click "More info → Run anyway".
 
 **Q: I double-clicked the exe but see no window?**
 
@@ -83,6 +103,10 @@ That is expected — it stays in the background and only shows a blue speaker ic
 **Q: How do I exit completely?**
 
 Right-click the tray icon → "退出" (Exit).
+
+**Q: I enabled Run at Startup, then moved the exe — now what?**
+
+The shortcut stores the absolute path of the exe, so it breaks when the exe moves. Click "Run at Startup" once to recreate it; the menu detects stale shortcuts and won't show them as enabled.
 
 ## Build from source
 
